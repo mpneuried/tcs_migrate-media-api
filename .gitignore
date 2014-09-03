@@ -1,0 +1,13 @@
+$ cat .gitignore
+
+*.DS_Store
+/lib
+/test
+/_releases
+/*.js
+/node_modules/*
+*.sublime*
+*.rdb
+deploy.json
+config.json
+config*.json

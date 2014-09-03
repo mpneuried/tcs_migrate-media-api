@@ -1,0 +1,33 @@
+{
+  "author": "mp, <mp@tcs.de> (www.tcs.de)",
+  "name": "tcs_migrate-media-api",
+  "description": "TCS Media-API Migration V1->V2 ",
+  "version": "0.0.1",
+  "homepage": "https://github.com/mpneuried/tcs_migrate-media-api",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mpneuried/tcs_migrate-media-api.git"
+  },
+  "engines": {
+    "node": "> 0.10.20"
+  },
+  "dependencies": {
+  	"mpbasic": "0.0.x",
+  	"extend": "1.2.x",
+    "lodash": "2.4.x",
+    "aws-sdk": "2.x",
+    "cli": "0.6.x",
+    "lowdb": "0.3.x",
+    "async": "0.9.x"
+  },
+  "devDependencies": {
+    "grunt": "0.4.x",
+    "grunt-regarde": "*",
+    "grunt-contrib-coffee": "*",
+    "grunt-include-replace": "*"
+  },
+  "bin": {
+    "media-api-migrate": "./bin/migrate"
+  }
+}
