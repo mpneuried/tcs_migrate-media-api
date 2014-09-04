@@ -19,7 +19,9 @@
     "aws-sdk": "2.x",
     "cli": "0.6.x",
     "lowdb": "0.3.x",
-    "async": "0.9.x"
+    "async": "0.9.x",
+    "multimeter": "0.1.x",
+    "entities": "1.1.x"
   },
   "devDependencies": {
     "grunt": "0.4.x",

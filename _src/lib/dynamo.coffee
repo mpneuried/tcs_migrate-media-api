@@ -4,6 +4,8 @@ async = require "async"
 
 config = require( "./config" )
 
+
+
 class Dynamo extends require( "mpbasic" )( config )
 	defaults: =>
 		return @extend {}, super, 
@@ -15,8 +17,8 @@ class Dynamo extends require( "mpbasic" )( config )
 			tablenameFiles: null
 			ReturnConsumedCapacity: "TOTAL"
 
-			pumps: 3
-			batchsize: 10
+			pumps: 5
+			batchsize: 25
 
 	constructor: ->
 		super
@@ -25,9 +27,13 @@ class Dynamo extends require( "mpbasic" )( config )
 
 		@wait = 0
 		@stateinfo = 
-			iSuccess: 0
+			capacityUnits: 0
+			Retries: 0
+			Errors: 0
 			#iTodo: 0
 		@pumping = false
+
+
 
 		@_configure()
 		return
@@ -92,14 +98,14 @@ class Dynamo extends require( "mpbasic" )( config )
 
 		@pumping = true
 		@emit "start.pump"
-		@info "start pump"
+		@debug "start pump"
 		aPumps = for i in [ 1..@config.pumps ]
 			@_pump( domain, fnAddData, fnGetData )
 
 		async.parallel aPumps, ( err, res )=>
 			@debug "async.parallel return"
 			@pumping = false
-			@info "stop pump"
+			@debug "stop pump"
 			@emit "stop.pump"
 			return
 		return
@@ -123,7 +129,7 @@ class Dynamo extends require( "mpbasic" )( config )
 			_sett = fnGetData( @config.batchsize )
 			
 			if _sett.length > 0
-				@writeBatch domain, _sett, fnAddData, ( err )=>
+				@writeBatch domain, _sett, fnAddData, =>
 					@emit "data.pumped"
 					@debug "writeBatch return wait #{@wait}"	
 					_.delay( @_pump( domain, fnAddData, fnGetData ), @wait, cba )
@@ -141,15 +147,19 @@ class Dynamo extends require( "mpbasic" )( config )
 			else
 				_datas.push( @_attr2Dynamo( domain, tuple ) )
 
-		@client.batchWriteItem @_createDynamoRequest( _datas ), ( err, res )=>
-			@info "dynamo written", @wait, res?.ConsumedCapacity[ 0 ]?.CapacityUnits, res?.UnprocessedItems[ @config.tablenameFiles ]?.length
+		_dynReq = @_createDynamoRequest( _datas )
+		@client.batchWriteItem _dynReq, ( err, res )=>
+			@debug "dynamo written", @wait, res?.ConsumedCapacity[ 0 ]?.CapacityUnits, res?.UnprocessedItems[ @config.tablenameFiles ]?.length or 0, res
 			if _.isNumber( res?.ConsumedCapacity?[ 0 ]?.CapacityUnits )
-				@stateinfo.iSuccess += res?.ConsumedCapacity[ 0 ].CapacityUnits
+				@stateinfo.capacityUnits += res?.ConsumedCapacity[ 0 ].CapacityUnits
 
 			if not _.isEmpty( res?.UnprocessedItems )
 				@throttle()
 				_putR = res?.UnprocessedItems[ @config.tablenameFiles ]
 				#@stateinfo.iTodo += _putR.length
+				#@stateinfo.capacityUnits -= _putR.length
+				@stateinfo.Retries += _putR.length
+				
 				@debug "retry", _putR
 				fnAddData( _putR )
 				cb()
@@ -158,6 +168,8 @@ class Dynamo extends require( "mpbasic" )( config )
 				@accelerate()
 
 			if err? and err.statusCode isnt 200
+				@stateinfo.Errors += 1
+				@emit "data.error", err, _dynReq
 				@error( err )
 				cb()
 				return
@@ -198,8 +210,8 @@ class Dynamo extends require( "mpbasic" )( config )
 				S: data.rev
 			fha: 
 				S: data.fha
-			url:
-				S: data.url
+			#url:
+			#	S: data.url
 			ttl:
 				N: ( data.ttl or -1 ).toString()
 			cty:
@@ -252,7 +264,7 @@ class Dynamo extends require( "mpbasic" )( config )
 		key: "key"
 		rev: "revision"
 		fha: "filehash"
-		url: "url"
+		#url: "url"
 		ttl: "ttl"
 		cty: "content_type"
 		cdi: "content-disposition"
@@ -270,8 +282,27 @@ class Dynamo extends require( "mpbasic" )( config )
 		for _dyn, _api of @attrMapping
 			attrs[ _dyn ] = if inp[ _api ]? then inp[ _api ] else null
 
-		attrs.key = domain + ":" + attrs.key
+		attrs.fha = domain.bucket + "/" + attrs.fha
+		attrs.key = domain.domain + ":" + attrs.key
+
+		# fix data on missing created date. us modified date
+		if not attrs.crd? or isNaN( parseInt( attrs.crd, 10 ) )
+			attrs.crd = @_rev2modDate( attrs.rev )
+
+		# fix empty acl data
+		if not attrs.acl? or attrs.acl not in [ "authenticated-read", "public-read" ]
+			attrs.acl = "authenticated-read"
+
 		return attrs
+
+	_rev2modDate: ( rev )=>
+		return @_now( parseInt( rev, 36 ) )
+
+	_now: ( date )=>
+		if date?
+			return Math.round( date/1000 )
+		else
+			return Math.round( Date.now()/1000 )
 
 	# Dynamo Helper Methods
 	_getItem: ( params, cb )=>

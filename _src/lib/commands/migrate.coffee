@@ -4,6 +4,12 @@ config = require( "../../lib/config" )
 
 cli.setApp( "Media-API Migration" )
 
+multimeter = require( "multimeter" )
+multi = multimeter(process);
+charm = multi.charm;
+charm.on('^C', process.exit);
+charm.reset();
+
 exports.run = ->
 	cli.parse(
 		domain: [ "d", "Domain to migrate", "string" ]
@@ -15,7 +21,9 @@ exports.run = ->
 		dynregion:  [ "dr", "AWSRegion", "string", "" ]
 	)
 	cli.main ( args, options )->
-		
+		process.stdout.write '\u001B[2J\u001B[0;0f'
+		loadbar = multi(20,7, { width: 70 })
+		writebar = multi(20,8, { width: 70 })
 		_cnf =
 			migration:
 				domain: options.domain
@@ -39,8 +47,8 @@ exports.run = ->
 			_process_loaded = 0
 			_mig.on "loadAllDataStart", ( count )=>
 				_process_count = count
-				cli.ok "Load all #{count} items ..."
-				cli.progress( 0 )
+				cli.ok "Load all #{count} items ...\nLoading SimpleDB:\nDynamo write cache:"
+				#cli.progress( 0 )
 				return 
 
 			_mig.on "loadAllDataStop", =>
@@ -49,20 +57,32 @@ exports.run = ->
 
 			_mig.on "loadAllDataReceived", ( loaded )=>
 				_process_loaded = _process_loaded + loaded
-				cli.progress( _process_loaded / _process_count )
+				#cli.progress( _process_loaded / _process_count )
+				_prec = ( _process_loaded / _process_count )*100
+				loadbar.percent( _prec, "#{Math.round(_prec)} % " )
 				return 
+
+			_mig.on "writeData", ( maxSize, open, dynamoState )=>
+				if maxSize > 0
+					_prec = ( open / maxSize )*100
+					#_mig.error( "prec", _prec, open , maxSize )
+					writebar.percent( _prec, "#{Math.round(_prec)} % - TODO:#{open}/#{maxSize} CUNITS:#{dynamoState.capacityUnits}  " )
+				else
+					writebar.percent( 0, "0 % - TODO:#{open}/#{maxSize}   " )
+				return
 
 			_mig.start ( err, resp )=>
 				if err
 					console.log _err.stack
 					cli.error( err )
 				else
-					cli.ok( resp )
+					cli.ok( JSON.stringify( resp, 1, 2 ) )
 				process.exit()
 				return
 		catch _err
 			console.log _err.stack
 			cli.error( _err )
+
 		return
 	return
 
