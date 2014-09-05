@@ -11,3 +11,4 @@ $ cat .gitignore
 deploy.json
 config.json
 config*.json
+db.json
