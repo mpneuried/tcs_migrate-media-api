@@ -12,6 +12,7 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 	defaults: =>
 		return @extend {}, super, 
 			domain: null
+			since: null
 			batchsize: 5
 
 	constructor: ->
@@ -44,7 +45,8 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 		#@data.autoSave = false
 		_path = path.resolve(__dirname + "/../" ) + "/db.json"
 		low.path = _path
-		low.load()
+		try
+			low.load()
 		@debug "save data to received `#{_path}`"
 
 		@checked = true
@@ -116,7 +118,7 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 			if not low( "_domain_state_").get( @config.domain )? 
 				low( "_domain_state_").insert( { id: @config.domain, _modified: 0 } )
 
-			simpledb.loadData @config.domain, _nextToken, ( err, data, nextToken )=>
+			simpledb.loadData @config.domain, @config.since, _nextToken, ( err, data, nextToken )=>
 				if err
 					error( err )
 					return

@@ -110,13 +110,13 @@ class SimpleDB extends require( "mpbasic" )( config )
 		#@debug "_processData", data.length
 		return _ret
 
-	loadData: ( domain, nextToken, cb )=>
+	loadData: ( domain, since, nextToken, cb )=>
 		if not @checked
 			cb( @_handleError( true, "ECHECKINVALID" ) )
 			return 
 
 		_params = 
-			SelectExpression: "select * from `#{domain}` where modified > '0' order by modified desc"
+			SelectExpression: "select * from `#{domain}` where modified > '#{since or 0}' order by modified desc"
 			ConsistentRead: true
 		_params.NextToken = nextToken if nextToken?
 

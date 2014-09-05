@@ -13,6 +13,7 @@ charm.reset();
 exports.run = ->
 	cli.parse(
 		domain: [ "d", "Domain to migrate", "string" ]
+		since: [ "s", "Read SimpleDB content since modified. As timestamp in seconds.", "number" ]
 		sdbaccesskey: [ "sa", "AWS Access Key", "string" ]
 		sdbsecret:  [ "ss", "AWS Access Key", "string" ]
 		sdbregion:  [ "sr", "AWSRegion", "string", "" ]
@@ -27,6 +28,7 @@ exports.run = ->
 		_cnf =
 			migration:
 				domain: options.domain
+				since: options.since
 		
 		_cnf.simpledb.accessKeyId = options.sdbaccesskey if options.sdbaccesskey?.length
 		_cnf.simpledb.secretAccessKey = options.sdbsecret if options.sdbsecret?.length
