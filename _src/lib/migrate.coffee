@@ -172,6 +172,7 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 				return
 			return
 
+	_rgxDS: /^ds/i
 	_convertSimpleDB2DynamoData: ( data )=>
 		attr = {}
 		#console.log data
@@ -201,7 +202,11 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 			attr.properties.author = entities.decodeHTML data.tcs_TAGS
 
 		attr.tags = []
-
+		# add the DSCI as tag
+		[ _dsserver, _dscid ] = attr.key.split( ":" )
+		if @_rgxDS.test( attr.key ) and _dscid?
+			attr.tags.push "dscid:#{_dscid}"
+			
 		attr.isRevision = if _krev? then 1 else 0
 		
 		attr.created = _created
