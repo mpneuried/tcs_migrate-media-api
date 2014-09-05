@@ -59,7 +59,7 @@ exports.run = ->
 				_process_loaded = _process_loaded + loaded
 				#cli.progress( _process_loaded / _process_count )
 				_prec = ( _process_loaded / _process_count )*100
-				loadbar.percent( _prec, "#{Math.round(_prec)} % " )
+				loadbar.percent( _prec, "#{Math.round(_prec)} % - LOADED:#{_process_loaded}" )
 				return 
 
 			_mig.on "writeData", ( maxSize, open, dynamoState )=>
@@ -68,7 +68,7 @@ exports.run = ->
 					#_mig.error( "prec", _prec, open , maxSize )
 					writebar.percent( _prec, "#{Math.round(_prec)} % - TODO:#{open}/#{maxSize} CUNITS:#{dynamoState.capacityUnits}  " )
 				else
-					writebar.percent( 0, "0 % - TODO:#{open}/#{maxSize}   " )
+					writebar.percent( 0, "0 % - TODO:#{open}/#{maxSize} CUNITS:#{dynamoState.capacityUnits}  " )
 				return
 
 			_mig.start ( err, resp )=>

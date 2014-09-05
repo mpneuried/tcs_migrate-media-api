@@ -17,7 +17,7 @@ class Dynamo extends require( "mpbasic" )( config )
 			tablenameFiles: null
 			ReturnConsumedCapacity: "TOTAL"
 
-			pumps: 5
+			pumps: 10
 			batchsize: 25
 
 	constructor: ->
@@ -213,9 +213,11 @@ class Dynamo extends require( "mpbasic" )( config )
 			#url:
 			#	S: data.url
 			ttl:
-				N: ( data.ttl or -1 ).toString()
+				N: ( data.ttl or 0 ).toString()
 			cty:
 				S: data.cty
+			cln:
+				N: data.cln.toString()
 			acl:
 				S: data.acl
 			old:
@@ -267,7 +269,8 @@ class Dynamo extends require( "mpbasic" )( config )
 		#url: "url"
 		ttl: "ttl"
 		cty: "content_type"
-		cdi: "content-disposition"
+		cdi: "content_disposition"
+		cln: "content_length"
 		acl: "acl"
 		hgt: "height"
 		wdt: "width"

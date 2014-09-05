@@ -186,7 +186,8 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 
 		attr.ttl = parseInt( data.ttl, 10 )
 		attr.content_type = data.content_type or "application/octet-stream"
-		attr[ "content-disposition" ] = data.content_disposition
+		attr[ "content_disposition" ] = data.content_disposition
+		attr[ "content_length" ] = parseInt( data.content_length, 10 )
 		attr.acl = data.acl
 
 		attr.width = parseInt( data.width, 10 )
