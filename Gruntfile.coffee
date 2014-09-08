@@ -36,6 +36,7 @@ module.exports = (grunt) ->
 
 				files:
 					"index.js": ["index.js"]
+					"deletedomain.js": ["deletedomain.js"]
 
 
 
@@ -50,7 +51,7 @@ module.exports = (grunt) ->
 	grunt.option('force', not grunt.option('force'))
 	
 	# ALIAS TASKS
-	grunt.registerTask "watch", "regarde"
+	grunt.registerTask "watch", [ "build", "regarde"]
 	grunt.registerTask "default", "build"
 
 	# build the project

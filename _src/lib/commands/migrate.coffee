@@ -14,12 +14,12 @@ exports.run = ->
 	cli.parse(
 		domain: [ "d", "Domain to migrate", "string" ]
 		since: [ "s", "Read SimpleDB content since modified. As timestamp in seconds.", "number" ]
-		sdbaccesskey: [ "sa", "AWS Access Key", "string" ]
-		sdbsecret:  [ "ss", "AWS Access Key", "string" ]
-		sdbregion:  [ "sr", "AWSRegion", "string", "" ]
-		dynaccesskey: [ "da", "AWS Access Key", "string" ]
-		dynsecret:  [ "ds", "AWS Access Key", "string" ]
-		dynregion:  [ "dr", "AWSRegion", "string", "" ]
+		sdbaccesskey: [ "sa", "AWS SimpleDB Access Key", "string" ]
+		sdbsecret:  [ "ss", "AWS SimpleDB Access Key", "string" ]
+		sdbregion:  [ "sr", "AWS SimpleDB Region", "string", "" ]
+		dynaccesskey: [ "da", "AWS DynamoDB Access Key", "string" ]
+		dynsecret:  [ "ds", "AWS DynamoDB Access Key", "string" ]
+		dynregion:  [ "dr", "AWS DynamoDB Region", "string", "" ]
 	)
 	cli.main ( args, options )->
 		process.stdout.write '\u001B[2J\u001B[0;0f'

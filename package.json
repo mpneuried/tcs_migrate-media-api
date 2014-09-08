@@ -21,7 +21,9 @@
     "lowdb": "0.3.x",
     "async": "0.9.x",
     "multimeter": "0.1.x",
-    "entities": "1.1.x"
+    "entities": "1.1.x",
+    "rsmq": "0.3.x",
+    "request": "2.42.x"
   },
   "devDependencies": {
     "grunt": "0.4.x",
@@ -30,6 +32,7 @@
     "grunt-include-replace": "*"
   },
   "bin": {
-    "media-api-migrate": "./bin/migrate"
+    "media-api-migrate": "./bin/migrate",
+    "media-api-deletedomain": "./bin/deletedomain"
   }
 }

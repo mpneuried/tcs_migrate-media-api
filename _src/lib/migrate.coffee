@@ -13,7 +13,6 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 		return @extend {}, super, 
 			domain: null
 			since: null
-			batchsize: 5
 
 	constructor: ->
 		super
