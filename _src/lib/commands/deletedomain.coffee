@@ -25,7 +25,7 @@ exports.run = ->
 		_cnf =
 			deletedomain:
 				domain: options.domain
-				mediaapiendpoint: options.endpoint or "http://localhost:8005/mediaapi/"
+				mediaapiendpoint: options.endpoint or "http://192.168.1.8:8005/mediaapi/"
 
 		_cnf.dynamo.accessKeyId = options.dynaccesskey if options.dynaccesskey?.length
 		_cnf.dynamo.secretAccessKey = options.dynsecret if options.dynsecret?.length

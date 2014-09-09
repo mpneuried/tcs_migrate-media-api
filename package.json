@@ -23,7 +23,9 @@
     "multimeter": "0.1.x",
     "entities": "1.1.x",
     "rsmq": "0.3.x",
-    "request": "2.42.x"
+    "request": "2.42.x",
+    "task-queue-worker": "0.1.x"
+
   },
   "devDependencies": {
     "grunt": "0.4.x",

@@ -5,6 +5,7 @@ urlParser = require( "url" )
 low = require('lowdb')
 _ = require('lodash')
 request = require( "request" )
+TqwClient = require( "task-queue-worker" ).Client
 
 config = require( "./config" )
 dynamo = require( "./dynamo" )
@@ -15,7 +16,8 @@ module.exports = class DeleteDomain extends require( "mpbasic" )( config )
 		return @extend {}, super, 
 			domain: null
 			blocksize: 100
-			mediaapiendpoint: "http://localhost:8005/mediaapi/"
+			mediaapiendpoint: "http://192.168.1.8:8005/mediaapi/"
+			queuename: "ma-deletedomain"
 
 	constructor: ->
 		super
@@ -62,6 +64,7 @@ module.exports = class DeleteDomain extends require( "mpbasic" )( config )
 			low.load()
 		@debug "save data to received `#{_path}`"
 
+		@twc = new TqwClient( queue: @config.queuename )
 		@checked = true
 		@emit "checked"
 		return
@@ -150,7 +153,7 @@ module.exports = class DeleteDomain extends require( "mpbasic" )( config )
 			if body.rows?.length
 				shared.keys2del = ( shared.keys2del or [] ).concat( _.pluck( body.rows, "key" ) )
 				@info "currently #{shared.keys2del.length} to delete"
-				fns.push @deleteItems
+				fns.push @queueDeleteItems 
 				next()
 			else
 				@info "No more elements received ..."
@@ -160,8 +163,21 @@ module.exports = class DeleteDomain extends require( "mpbasic" )( config )
 		return
 
 	queueDeleteItems: ( shared, next, error, fns )=>
-		error( "NOTIMPL" )
+		for key in shared.keys2del
+			fns.push @queueDeleteItem( key )
+		next() 
 		return
+
+	queueDeleteItem: ( key )=>
+		return ( shared, next, error, fns )=>
+			_url = ( @config.mediaapiendpoint + @config.domain + "/#{key}" )
+			@twc.send url: @_signUrl( _url ), method: "DELETE", ( err, resp )=>
+				if err
+					error( err )
+					return
+				next()
+				return
+			return
 
 	ERRORS: =>
 		return @extend {}, super, 
