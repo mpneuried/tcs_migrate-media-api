@@ -146,12 +146,14 @@ module.exports = class DeleteDomain extends require( "mpbasic" )( config )
 			url: @_signUrl( _url )
 			json: true
 
+		shared.keys2del = []
 		request _opt, ( err, resp, body )=>
 			if err
 				error( err )
 				return
 			if body.rows?.length
-				shared.keys2del = ( shared.keys2del or [] ).concat( _.pluck( body.rows, "key" ) )
+				for ele in  body.rows
+					shared.keys2del.push [ ele.key, ele.revision ]
 				@info "currently #{shared.keys2del.length} to delete"
 				fns.push @queueDeleteItems 
 				next()
@@ -163,15 +165,17 @@ module.exports = class DeleteDomain extends require( "mpbasic" )( config )
 		return
 
 	queueDeleteItems: ( shared, next, error, fns )=>
-		for key in shared.keys2del
-			fns.push @queueDeleteItem( key )
+		for ele in shared.keys2del
+			fns.push @queueDeleteItem( ele[ 0 ], ele[ 1 ] )
 		next() 
 		return
 
-	queueDeleteItem: ( key )=>
+	queueDeleteItem: ( key, revision )=>
 		return ( shared, next, error, fns )=>
-			_url = ( @config.mediaapiendpoint + @config.domain + "/#{key}" )
-			@twc.send url: @_signUrl( _url ), method: "DELETE", ( err, resp )=>
+			_url = ( @config.mediaapiendpoint + @config.domain + "/#{key}?revision=#{revision}" )
+			@debug "delete: #{_url}" 
+			@twc.send url: @_signUrl( _url ), method: "DELETE", timeout: 100, ( err, resp )=>
+				@debug "delete resp: #{resp}" 
 				if err
 					error( err )
 					return
