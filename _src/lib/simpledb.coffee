@@ -126,6 +126,11 @@ class SimpleDB extends require( "mpbasic" )( config )
 				cb( err )
 				return
 			
+			if not raw.Items?.length
+				@info "Empty SimpleDB result from `#{domain}`"
+				cb( null, [] )
+				return
+
 			if raw.NextToken?.length
 				cb( null, @_processData( raw.Items ), raw.NextToken )
 			else

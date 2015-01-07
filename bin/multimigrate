@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+
+var path = require('path');
+var fs   = require('fs');
+var bin  = path.join(path.dirname(fs.realpathSync(__filename)), '../bin');
+var sys = require('sys');
+var exec = require('child_process').exec;
+function puts(error, stdout, stderr) {
+	//sys.puts(stdout);
+	console.log( "ALL: CB" )
+}
+var domains;
+
+if( process.argv[ 2 ] === "-h" || process.argv[ 2 ] == "--help" ){
+	console.info( "USAGE:\n\tmultimigrate DOMAINLISTFILE [SINCE]\n\nEXAMPLES:\n\tmultimigrate ./domains.txt\n\tmultimigrate ./domains.txt 1420629737" );
+	return
+}
+
+var filename = process.argv[ 2 ];
+
+if( !filename ){
+	console.error( "Please define a source domain list file as first argument!" );
+	return
+}
+
+var since = process.argv[ 3 ];
+
+console.time( "ALL: Duration of all domains" );
+var run = function(){
+	var domain, _curr, childprc;
+	_curr = domains.splice( 0 , 1 );
+	if( _curr.length ){
+		domain = _curr[0];
+		
+		var _cmd = bin + "/migrate";
+		if( since ){
+			_cmd += " -s " + since;
+		}
+		_cmd += " -d " + domain;
+
+		childprc = exec( _cmd, puts);
+		
+		childprc.stdout.pipe( process.stdout );
+		childprc.stderr.pipe( process.stderr );
+		childprc.on( "exit", function(){
+			childprc.stdout.unpipe( process.stdout );
+			childprc.stderr.unpipe( process.stderr );
+			console.log( "ALL: DOMAIN `" + domain + "` done!" );
+			run();
+		});
+	}else{
+		console.timeEnd( "ALL: Duration of all domains" );
+	}
+}
+
+fs.readFile( filename, function( err, data ){
+	if( err ){
+		console.error( err );
+		return
+	}	
+	domains = data.toString().split( "\n" );
+	console.log( "ALL: Run " + domains.length + " Domains: " );
+
+	run();
+
+} );

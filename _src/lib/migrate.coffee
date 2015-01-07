@@ -13,6 +13,7 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 		return @extend {}, super, 
 			domain: null
 			since: null
+			showmeta: false
 
 	constructor: ->
 		super
@@ -243,7 +244,7 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 				error( err )
 				return
 			if @config.domain not in domains
-				error( @_handleError( true, "EDOMAINNOTFOUND" ) )
+				error( @_handleError( true, "EDOMAINNOTFOUND", domain: @config.domain ) )
 				return
 
 			next()
@@ -260,7 +261,14 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 				error( err )
 				return
 			shared.metaSource = meta
-			@info "\n\nDomain Target Infos:\n- Items: #{meta.ItemCount}\n- Attributes: #{meta.AttributeNameCount}"
+
+			@info "\n\nDomain `#{@config.domain}` Target Infos:\n- Items: #{meta.ItemCount}\n- Attributes: #{meta.AttributeNameCount}"
+			if @config.showmeta
+				process.exit()
+
+			if meta.ItemCount <= 0
+				error( @_handleError( true, "EEMPTYDOMAIN", domain: @config.domain ) )
+				return
 			@emit "loadAllDataStart", shared.metaSource.ItemCount
 			next()
 			return
@@ -288,5 +296,6 @@ module.exports = class Migration extends require( "mpbasic" )( config )
 	ERRORS: =>
 		return @extend {}, super, 
 			"EMISSINGDOMAIN": [ 401, "Missing Domain. Please define the option `--domain` or it's shortcut -d`" ]
-			"EDOMAINNOTFOUND": [ 404, "Domain not found. The given domain has not been found in source SimpleDB" ]
+			"EDOMAINNOTFOUND": [ 404, "Domain `<%= domain %>` not found. The given domain has not been found in source SimpleDB" ]
 			"ECHECKINVALID": [ 500, "Its not possible to run start if the check has been failed" ]
+			"EEMPTYDOMAIN": [ 404, "The Domain `<%= domain %>` is empty" ]

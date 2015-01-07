@@ -12,3 +12,4 @@ deploy.json
 config.json
 config*.json
 db.json
+*.txt

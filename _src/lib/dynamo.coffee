@@ -216,8 +216,8 @@ class Dynamo extends require( "mpbasic" )( config )
 				N: ( data.ttl or 0 ).toString()
 			cty:
 				S: data.cty
-			cln:
-				N: data.cln.toString()
+			#cln:
+			#	N: data.cln.toString()
 			acl:
 				S: data.acl
 			old:
@@ -226,6 +226,10 @@ class Dynamo extends require( "mpbasic" )( config )
 				N: data.crd.toString()
 			_u:
 				N: data._u.toString()
+
+		if not isNaN( data.cln )
+			_item.cln =  
+				N: data.cln.toString()
 
 		if data.cdi?.length
 			_item.cdi =  

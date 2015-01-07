@@ -13,6 +13,7 @@ charm.reset();
 exports.run = ->
 	cli.parse(
 		domain: [ "d", "Domain to migrate", "string" ]
+		showmeta: [ "m", "Only show source meta data", "boolean" ]
 		since: [ "s", "Read SimpleDB content since modified. As timestamp in seconds.", "number" ]
 		sdbaccesskey: [ "sa", "AWS SimpleDB Access Key", "string" ]
 		sdbsecret:  [ "ss", "AWS SimpleDB Access Key", "string" ]
@@ -29,6 +30,7 @@ exports.run = ->
 			migration:
 				domain: options.domain
 				since: options.since
+				showmeta: options.showmeta
 		
 		_cnf.simpledb.accessKeyId = options.sdbaccesskey if options.sdbaccesskey?.length
 		_cnf.simpledb.secretAccessKey = options.sdbsecret if options.sdbsecret?.length
@@ -75,14 +77,14 @@ exports.run = ->
 
 			_mig.start ( err, resp )=>
 				if err
-					console.log _err.stack
+					console.log _err.stack if _err?.stack?
 					cli.error( err )
 				else
 					cli.ok( JSON.stringify( resp, 1, 2 ) )
 				process.exit()
 				return
 		catch _err
-			console.log _err.stack
+			console.log _err.stack if _err?.stack?
 			cli.error( _err )
 
 		return
@@ -90,6 +92,6 @@ exports.run = ->
 
 process.on "uncaughtException", ( _err )=>
 	cli.error( _err )
-	console.log _err.stack
+	console.log _err.stack if _err?.stack?
 	process.exit()
 	return
