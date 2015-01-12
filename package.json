@@ -2,7 +2,7 @@
   "author": "mp, <mp@tcs.de> (www.tcs.de)",
   "name": "tcs_migrate-media-api",
   "description": "TCS Media-API Migration V1->V2 ",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/mpneuried/tcs_migrate-media-api",
   "private": true,
   "repository": {

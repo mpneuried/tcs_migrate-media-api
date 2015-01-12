@@ -12,7 +12,7 @@ function puts(error, stdout, stderr) {
 var domains;
 
 if( process.argv[ 2 ] === "-h" || process.argv[ 2 ] == "--help" ){
-	console.info( "USAGE:\n\tmultimigrate DOMAINLISTFILE [SINCE]\n\nEXAMPLES:\n\tmultimigrate ./domains.txt\n\tmultimigrate ./domains.txt 1420629737" );
+	console.info( "USAGE:\n\tmultimigrate DOMAINLISTFILE [SINCE|-m]\n\nEXAMPLES:\n\tmultimigrate ./domains.txt\n\t\tFull migration\n\tmultimigrate ./domains.txt 1420629737\n\t\tMigrate only until\n\tmultimigrate ./domains.txt -m\n\t\tGet only metadata\n\nINFO:\nAll domains in file started with `#` will be skipped.\n" );
 	return
 }
 
@@ -32,8 +32,16 @@ var run = function(){
 	if( _curr.length ){
 		domain = _curr[0];
 		
+		if( domain[0] == "#" ){
+			console.log( "ALL: DOMAIN `" + domain + "` skipped!" );
+			run();
+			return
+		}
+
 		var _cmd = bin + "/migrate";
-		if( since ){
+		if( since == "-m" ){
+			_cmd += " -m ";
+		}else if( since ){
 			_cmd += " -s " + since;
 		}
 		_cmd += " -d " + domain;

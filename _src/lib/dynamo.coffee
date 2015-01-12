@@ -76,7 +76,7 @@ class Dynamo extends require( "mpbasic" )( config )
 			if domainData?.domain?
 				cb( null, domainData )
 			else
-				@_handleError( cb, "EDOMAINNOTFOUND" )
+				@_handleError( cb, "EDOMAINNOTFOUND", domain: domain )
 			return
 		return
 
@@ -375,7 +375,7 @@ class Dynamo extends require( "mpbasic" )( config )
 	ERRORS: =>
 		return @extend {}, super, 
 			"EDYNAMOMISSINGTABLE": [ 400, "The dynamo table does not exist. Please generate it!" ]
-			"EDOMAINNOTFOUND": [ 404, "Domain not found. The given domain has not been found in target DynamoDB" ]
+			"EDOMAINNOTFOUND": [ 404, "Domain `<%= domain %>` not found. The given domain has not been found in target DynamoDB" ]
 			"EMISSINGAWSACCESSKEY": [ 401, "Missing AWS Access Key. Please define the option `--awsaccesskey` or it's shortcut -a`" ]
 			"EMISSINGAWSSECRET": [ 401, "Missing AWS Secret. Please define the option `-awssecret` or it's shortcut `-s`" ]
 			"ECHECKINVALID": [ 500, "Its not possible to run start if the check has been failed" ]
