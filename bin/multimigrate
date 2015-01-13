@@ -23,7 +23,13 @@ if( !filename ){
 	return
 }
 
-var since = process.argv[ 3 ];
+var meta = false;
+if( process.argv[ 3 ] == "-m" ){
+	meta = true
+	var since = process.argv[ 4 ];
+}else{
+	var since = process.argv[ 3 ];
+}
 
 console.time( "ALL: Duration of all domains" );
 var run = function(){
@@ -39,12 +45,15 @@ var run = function(){
 		}
 
 		var _cmd = bin + "/migrate";
-		if( since == "-m" ){
+		if( meta ){
 			_cmd += " -m ";
-		}else if( since ){
+		}
+		if( since ){
 			_cmd += " -s " + since;
 		}
 		_cmd += " -d " + domain;
+		
+		console.log( "ALL: CMD `" + _cmd + "`" );
 
 		childprc = exec( _cmd, puts);
 		
